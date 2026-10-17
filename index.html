@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Ear training for music students, from single notes to extended and altered chords.">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Ear Ladder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: practice ladder on the left (strip on phones), one drill stage on the right with a keyboard reveal under the answers. */
+:root{
+  --bg:#F2F4F8; --surface:#FFFFFF; --sunk:#E7EAF1; --ink:#151A28; --muted:#5A6276; --line:#D7DBE5;
+  --accent:#2B45C4; --accent-ink:#FFFFFF; --accent-soft:#DDE3FB;
+  --good:#17845A; --good-soft:#D6F1E4; --bad:#C23A2B; --bad-soft:#F8DEDA; --ref:#8A93AA;
+  --key-white:#FFFFFF; --key-black:#1C2130; --key-edge:#C6CBD8;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1119; --surface:#161A25; --sunk:#1E2331; --ink:#E7EAF3; --muted:#9AA2B8; --line:#2A3042;
+  --accent:#8297FF; --accent-ink:#0E1119; --accent-soft:#252E58;
+  --good:#45C68E; --good-soft:#163628; --bad:#FF7A68; --bad-soft:#3F1F1B; --ref:#6C7590;
+  --key-white:#E9ECF3; --key-black:#0A0C12; --key-edge:#3A4155; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1119; --surface:#161A25; --sunk:#1E2331; --ink:#E7EAF3; --muted:#9AA2B8; --line:#2A3042;
+  --accent:#8297FF; --accent-ink:#0E1119; --accent-soft:#252E58;
+  --good:#45C68E; --good-soft:#163628; --bad:#FF7A68; --bad-soft:#3F1F1B; --ref:#6C7590;
+  --key-white:#E9ECF3; --key-black:#0A0C12; --key-edge:#3A4155; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:20px 48px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:290px minmax(0,1fr);gap:28px;align-items:start}
+.top{grid-column:1/-1;display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:4px}
+.brand{font-family:var(--f-display);font-weight:800;font-size:28px;letter-spacing:-.02em;margin:0;display:flex;align-items:center;gap:10px}
+.brand svg{flex:none}
+.tag{color:var(--muted);margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* ladder */
+.side{display:flex;flex-direction:column;gap:20px;position:sticky;top:calc(env(safe-area-inset-top, 0px) + 16px)}
+.ladder{display:flex;flex-direction:column;gap:4px}
+.group-h{margin:14px 0 4px 10px}
+.group-h:first-child{margin-top:0}
+.rung{display:grid;grid-template-columns:26px minmax(0,1fr) auto;align-items:center;gap:4px 10px;padding:9px 10px;border-radius:var(--r);
+  border:1px solid transparent;background:none;text-align:left;width:100%}
+.rung:hover{background:var(--sunk)}
+.rung[aria-current="true"]{background:var(--surface);border-color:var(--line)}
+.rung .n{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.rung .t{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rung .g{display:none}
+.rung .meter{grid-column:2/4;height:4px;border-radius:2px;background:var(--sunk);position:relative;overflow:visible}
+.rung[aria-current="true"] .meter{background:var(--bg)}
+.rung .meter i{position:absolute;inset:0 auto 0 0;border-radius:2px;background:var(--accent)}
+.rung .meter b{position:absolute;top:-2px;bottom:-2px;left:90%;width:1.5px;background:var(--muted);opacity:.6}
+.chip{font-family:var(--f-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:999px;white-space:nowrap}
+.chip.done{background:var(--good-soft);color:var(--good)}
+.chip.next{background:var(--accent-soft);color:var(--accent)}
+
+.settings{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:12px}
+.setting{display:flex;flex-direction:column;gap:6px}
+.setting label,.setting .lbl{font-size:13px;color:var(--muted)}
+.seg{display:flex;background:var(--sunk);border-radius:8px;padding:3px;gap:2px}
+.seg button{flex:1;border:0;background:none;padding:5px 6px;border-radius:6px;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--surface);box-shadow:0 1px 2px rgb(0 0 0 / .12);font-weight:700}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--ink)}
+.toggle input{width:34px;height:20px;accent-color:var(--accent)}
+.reset{border:1px solid var(--line);background:none;border-radius:8px;padding:6px 10px;font-size:13px;color:var(--muted)}
+.reset.arm{border-color:var(--bad);color:var(--bad)}
+
+/* drill */
+.main{display:flex;flex-direction:column;gap:20px;min-width:0}
+.drill{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:26px clamp(16px,3vw,32px);display:flex;flex-direction:column;gap:22px}
+.drill-h{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.drill-h h2{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,3.2vw,34px);letter-spacing:-.02em;line-height:1.1;margin:4px 0 6px;text-wrap:balance}
+.drill-h p{margin:0;color:var(--muted);max-width:56ch}
+.counter{display:flex;gap:18px;font-variant-numeric:tabular-nums}
+.counter div{display:flex;flex-direction:column;align-items:flex-end}
+.counter strong{font-family:var(--f-display);font-size:24px;line-height:1}
+
+.stage{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.play{position:relative;width:92px;height:92px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none;
+  box-shadow:0 6px 18px -6px color-mix(in srgb, var(--accent) 70%, transparent);transition:transform .12s}
+.play:active{transform:scale(.96)}
+.play svg{width:34px;height:34px}
+.play::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--accent);opacity:0}
+.play.sounding::after{animation:ring 1.1s ease-out infinite}
+@keyframes ring{from{opacity:.55;transform:scale(.92)}to{opacity:0;transform:scale(1.25)}}
+.stage-text{display:flex;flex-direction:column;gap:8px;min-width:0}
+.stage-text .hint{font-size:17px;font-weight:700}
+.alt{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-size:14px}
+.btn:hover{background:var(--sunk)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.primary:hover{opacity:.9;background:var(--ink)}
+kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;color:var(--muted);background:var(--bg)}
+
+.answers{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px}
+.ans{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:11px 12px 10px;border-radius:var(--r);
+  border:1px solid var(--line);background:var(--bg);min-height:64px;transition:background .12s,border-color .12s}
+.ans:hover:not(:disabled){border-color:var(--accent)}
+.ans:disabled{cursor:default}
+.ans .main{font-family:var(--f-display);font-weight:700;font-size:19px;line-height:1.15}
+.ans .sub{font-size:12.5px;color:var(--muted);line-height:1.3}
+.ans .k{position:absolute;top:8px;right:9px;font-family:var(--f-mono);font-size:10.5px;color:var(--muted);opacity:.8}
+.answers.locked .ans{opacity:.55}
+.ans.right{background:var(--good-soft);border-color:var(--good)}
+.ans.right .main{color:var(--good)}
+.ans.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.ans.wrong .main{color:var(--bad)}
+
+.feedback{min-height:28px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:16px}
+.feedback .verdict{font-family:var(--f-display);font-weight:700;font-size:18px}
+.feedback .verdict.good{color:var(--good)}
+.feedback .verdict.bad{color:var(--bad)}
+.feedback .notes{font-family:var(--f-mono);font-size:14px;color:var(--muted)}
+
+.reveal{display:flex;flex-direction:column;gap:12px}
+.reveal-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.legend{display:flex;gap:14px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+.kb-wrap{overflow-x:auto;border-radius:8px;-webkit-overflow-scrolling:touch}
+.kb{position:relative;display:flex;height:120px;min-width:560px;user-select:none;-webkit-user-select:none;padding-top:4px;border-top:4px solid var(--key-black);border-radius:6px 6px 0 0}
+.kw{flex:1;background:var(--key-white);border:1px solid var(--key-edge);border-top:0;border-radius:0 0 5px 5px;margin-right:-1px;position:relative;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;cursor:pointer}
+.kw span{font-family:var(--f-mono);font-size:9.5px;color:#7a8296}
+.kb .kbk{position:absolute;top:4px;height:62%;background:var(--key-black);border-radius:0 0 4px 4px;z-index:2;cursor:pointer;border:1px solid var(--key-black)}
+.kw.on,.kbk.on{background:var(--accent)!important;border-color:var(--accent)}
+.kw.on span{color:var(--accent-ink)}
+.kw.refk,.kbk.refk{background:var(--ref)!important;border-color:var(--ref)}
+.kw.alt-on,.kbk.alt-on{background:var(--bad)!important;border-color:var(--bad)}
+.kw.press,.kbk.press{filter:brightness(.85)}
+
+/* insights */
+.insights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h3{margin:0;font-size:14px;font-weight:700}
+.big{font-family:var(--f-display);font-weight:800;font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+.big small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+.dots{display:grid;grid-template-columns:repeat(20,1fr);gap:3px}
+.dots i{aspect-ratio:1;border-radius:2px;background:var(--sunk);max-width:100%}
+.dots i.y{background:var(--good)}
+.dots i.n{background:var(--bad)}
+.muted{color:var(--muted);font-size:13px;margin:0}
+.conf{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+.conf li{display:flex;justify-content:space-between;gap:8px}
+.conf b{font-family:var(--f-mono);font-weight:500}
+.conf .x{font-family:var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+
+@media (max-width: 900px){
+  .app{grid-template-columns:minmax(0,1fr);gap:18px}
+  .side{position:static;order:0}
+  .ladder{flex-direction:row;overflow-x:auto;gap:8px;padding-bottom:6px;scroll-snap-type:x proximity}
+  .group-h{display:none}
+  .rung{flex:none;width:170px;background:var(--surface);border-color:var(--line);scroll-snap-align:start}
+  .rung[aria-current="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+  .rung .g{display:block;grid-column:2/4;font-family:var(--f-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);order:-1}
+  .settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+  .main{order:1}
+  .insights{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width: 480px){
+  .play{width:76px;height:76px}
+  .answers{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .counter strong{font-size:20px}
+}
+@media (prefers-reduced-motion: reduce){
+  .play.sounding::after{animation:none;opacity:.5}
+  *{transition:none!important}
+}
+</style>
+
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1 class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="5" y="2" width="3" height="26" rx="1.5" fill="var(--ink)"/><rect x="22" y="2" width="3" height="26" rx="1.5" fill="var(--ink)"/><rect x="8" y="7" width="14" height="2.6" fill="var(--accent)"/><rect x="8" y="14" width="14" height="2.6" fill="var(--accent)"/><rect x="8" y="21" width="14" height="2.6" fill="var(--accent)"/></svg>
+      Ear Ladder
+    </h1>
+    <p class="tag">Thirteen rungs, from one note in a key to altered thirteenth chords.</p>
+  </header>
+
+  <aside class="side">
+    <nav class="ladder" id="ladder" aria-label="Levels"></nav>
+    <section class="settings" aria-label="Settings">
+      <div class="setting">
+        <span class="lbl" id="lbl-chord">Chord playback</span>
+        <div class="seg" role="group" aria-labelledby="lbl-chord" id="set-chord">
+          <button data-v="block">Block</button><button data-v="arp">Arpeggio</button><button data-v="both">Both</button>
+        </div>
+      </div>
+      <div class="setting">
+        <span class="lbl" id="lbl-key">Key for single notes</span>
+        <div class="seg" role="group" aria-labelledby="lbl-key" id="set-key">
+          <button data-v="fixed">C major</button><button data-v="any">Any key</button>
+        </div>
+      </div>
+      <label class="toggle" for="set-cadence">Play a cadence before single notes <input type="checkbox" id="set-cadence"></label>
+      <label class="toggle" for="set-auto">Next question after a correct answer <input type="checkbox" id="set-auto"></label>
+      <button class="reset" id="reset">Erase all progress</button>
+    </section>
+  </aside>
+
+  <main class="main">
+    <section class="drill" aria-labelledby="lv-name">
+      <div class="drill-h">
+        <div>
+          <div class="eyebrow" id="lv-group"></div>
+          <h2 id="lv-name"></h2>
+          <p id="lv-blurb"></p>
+        </div>
+        <div class="counter" aria-label="This session">
+          <div><strong id="c-score">0/0</strong><span class="eyebrow">Session</span></div>
+          <div><strong id="c-streak">0</strong><span class="eyebrow">Streak</span></div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <button class="play" id="play" aria-label="Play question">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.4-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" fill="currentColor"/></svg>
+        </button>
+        <div class="stage-text">
+          <div class="hint" id="hint">Press play to hear the first question.</div>
+          <div class="alt" id="alt"></div>
+        </div>
+      </div>
+
+      <div class="answers locked" id="answers" role="group" aria-label="Answers"></div>
+
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+
+      <div class="reveal">
+        <div class="kb-wrap"><div class="kb" id="kb" aria-label="Keyboard. Tap a key to hear it."></div></div>
+        <div class="reveal-row">
+          <div class="legend">
+            <span><i style="background:var(--accent)"></i>Answer</span>
+            <span><i style="background:var(--ref)"></i>Tonic</span>
+            <span><i style="background:var(--bad)"></i>Your guess</span>
+            <span>Tap any key to hear it</span>
+          </div>
+          <div class="alt" id="compare"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="insights">
+      <div class="card">
+        <h3>Last 20 on this rung</h3>
+        <div class="big" id="i-last">0<small>/20</small></div>
+        <div class="dots" id="i-dots"></div>
+        <p class="muted" id="i-mastery">Get 18 of your last 20 right to master this rung.</p>
+      </div>
+      <div class="card">
+        <h3>All time on this rung</h3>
+        <div class="big" id="i-all">–</div>
+        <p class="muted" id="i-all-sub">No answers yet.</p>
+      </div>
+      <div class="card">
+        <h3>Most confused</h3>
+        <ul class="conf" id="i-conf"></ul>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(() => {
+// ---------- theory ----------
+const LETTERS = ['C','D','E','F','G','A','B'], LPC = [0,2,4,5,7,9,11];
+const MAJ = [0,2,4,5,7,9,11,12,14,16,17,19,21];
+const acc = d => ({0:'',1:'♯',2:'𝄪','-1':'♭','-2':'𝄫'})[d] ?? '';
+const spell = (root, semi, deg) => {
+  const li = (root.l + deg - 1) % 7, pc = ((root.pc + semi) % 12 + 12) % 12;
+  let d = ((pc - LPC[li]) % 12 + 12) % 12; if (d > 6) d -= 12;
+  return LETTERS[li] + acc(d);
+};
+const degLabel = (semi, deg) => acc(semi - MAJ[deg - 1]) + deg;
+const ROOTS = [['C',0,0],['D♭',1,1],['D',1,2],['E♭',2,3],['E',2,4],['F',3,5],['F♯',3,6],['G',4,7],['A♭',5,8],['A',5,9],['B♭',6,10],['B',6,11]]
+  .map(([n,l,pc]) => ({n,l,pc}));
+
+const DEGREES = [[0,1,'Do'],[1,2,'Ra'],[2,2,'Re'],[3,3,'Me'],[4,3,'Mi'],[5,4,'Fa'],[6,4,'Fi'],[7,5,'Sol'],[8,6,'Le'],[9,6,'La'],[10,7,'Te'],[11,7,'Ti'],[12,8,'Do′']]
+  .map(([semi,deg,solf]) => ({id:String(semi), semi, deg, solf}));
+const INTERVALS = [
+  ['m2',1,2,'Minor 2nd'],['M2',2,2,'Major 2nd'],['m3',3,3,'Minor 3rd'],['M3',4,3,'Major 3rd'],['P4',5,4,'Perfect 4th'],['TT',6,4,'Tritone'],
+  ['P5',7,5,'Perfect 5th'],['m6',8,6,'Minor 6th'],['M6',9,6,'Major 6th'],['m7',10,7,'Minor 7th'],['M7',11,7,'Major 7th'],['P8',12,8,'Octave'],
+  ['m9',13,9,'Minor 9th'],['M9',14,9,'Major 9th'],['m10',15,10,'Minor 10th'],['M10',16,10,'Major 10th'],['P11',17,11,'Perfect 11th'],
+  ['A11',18,11,'Augmented 11th'],['P12',19,12,'Perfect 12th'],['m13',20,13,'Minor 13th'],['M13',21,13,'Major 13th']
+].map(([id,semi,deg,name]) => ({id, semi, deg, name}));
+const IV = Object.fromEntries(INTERVALS.map(i => [i.id, i]));
+const T = (...p) => p.map(([s,d]) => ({s,d}));
+const CHORDS = {
+  maj:  {name:'Major', sym:'', tones:T([0,1],[4,3],[7,5])},
+  min:  {name:'Minor', sym:'m', tones:T([0,1],[3,3],[7,5])},
+  dim:  {name:'Diminished', sym:'°', tones:T([0,1],[3,3],[6,5])},
+  aug:  {name:'Augmented', sym:'+', tones:T([0,1],[4,3],[8,5])},
+  sus2: {name:'Sus 2', sym:'sus2', tones:T([0,1],[2,2],[7,5])},
+  sus4: {name:'Sus 4', sym:'sus4', tones:T([0,1],[5,4],[7,5])},
+  maj7: {name:'Major 7', sym:'maj7', tones:T([0,1],[4,3],[7,5],[11,7])},
+  '7':  {name:'Dominant 7', sym:'7', tones:T([0,1],[4,3],[7,5],[10,7])},
+  m7:   {name:'Minor 7', sym:'m7', tones:T([0,1],[3,3],[7,5],[10,7])},
+  m7b5: {name:'Half-diminished', sym:'ø7', tones:T([0,1],[3,3],[6,5],[10,7])},
+  dim7: {name:'Diminished 7', sym:'°7', tones:T([0,1],[3,3],[6,5],[9,7])},
+  mmaj7:{name:'Minor-major 7', sym:'m(maj7)', tones:T([0,1],[3,3],[7,5],[11,7])},
+  '6':  {name:'Major 6', sym:'6', tones:T([0,1],[4,3],[7,5],[9,6])},
+  m6:   {name:'Minor 6', sym:'m6', tones:T([0,1],[3,3],[7,5],[9,6])},
+  maj9: {name:'Major 9', sym:'maj9', tones:T([0,1],[4,3],[7,5],[11,7],[14,9])},
+  '9':  {name:'Dominant 9', sym:'9', tones:T([0,1],[4,3],[7,5],[10,7],[14,9])},
+  m9:   {name:'Minor 9', sym:'m9', tones:T([0,1],[3,3],[7,5],[10,7],[14,9])},
+  '7b9':{name:'7 flat 9', sym:'7♭9', tones:T([0,1],[4,3],[7,5],[10,7],[13,9])},
+  '7s9':{name:'7 sharp 9', sym:'7♯9', tones:T([0,1],[4,3],[7,5],[10,7],[15,9])},
+  '7s11':{name:'7 sharp 11', sym:'7♯11', tones:T([0,1],[4,3],[7,5],[10,7],[14,9],[18,11])},
+  m11:  {name:'Minor 11', sym:'m11', tones:T([0,1],[3,3],[7,5],[10,7],[14,9],[17,11])},
+  '13': {name:'Dominant 13', sym:'13', tones:T([0,1],[4,3],[7,5],[10,7],[14,9],[21,13])},
+  maj7s11:{name:'Major 7 sharp 11', sym:'maj7♯11', tones:T([0,1],[4,3],[7,5],[11,7],[14,9],[18,11])},
+  '69': {name:'Six-nine', sym:'6/9', tones:T([0,1],[4,3],[7,5],[9,6],[14,9])},
+};
+const INV3 = [['0','Root position','5/3'],['1','First inversion','6/3'],['2','Second inversion','6/4']];
+const INV7 = [['0','Root position','7'],['1','First inversion','6/5'],['2','Second inversion','4/3'],['3','Third inversion','4/2']];
+
+const SIMPLE = INTERVALS.slice(0,12).map(i => i.id), COMPOUND = INTERVALS.slice(12).map(i => i.id);
+const LEVELS = [
+  {id:'deg-major', group:'Single notes', name:'Major scale degrees', kind:'degree', opts:['0','2','4','5','7','9','11','12'],
+    blurb:'You hear the key, then one note. Name where it sits in the major scale.'},
+  {id:'deg-chrom', group:'Single notes', name:'Chromatic degrees', kind:'degree', opts:['0','1','2','3','4','5','6','7','8','9','10','11'],
+    blurb:'All twelve notes against the key, including the borrowed and altered ones.'},
+  {id:'int-first', group:'Intervals', name:'First intervals', kind:'interval', dir:'asc', opts:['M2','M3','P4','P5','P8'],
+    blurb:'Five intervals that sound clearly different, played low to high.'},
+  {id:'int-asc', group:'Intervals', name:'All intervals up', kind:'interval', dir:'asc', opts:SIMPLE,
+    blurb:'Every interval from a minor 2nd to an octave, played low to high.'},
+  {id:'int-desc', group:'Intervals', name:'All intervals down', kind:'interval', dir:'desc', opts:SIMPLE,
+    blurb:'The same twelve intervals, played high to low.'},
+  {id:'int-harm', group:'Intervals', name:'Harmonic intervals', kind:'interval', dir:'harm', opts:SIMPLE,
+    blurb:'Both notes at once. Listen for how smooth or rough the pair sounds.'},
+  {id:'int-comp', group:'Intervals', name:'Compound intervals', kind:'interval', dir:'mixed', opts:COMPOUND,
+    blurb:'Intervals wider than an octave, from the minor 9th to the major 13th.'},
+  {id:'ch-mm', group:'Chords', name:'Major or minor', kind:'chord', opts:['maj','min'],
+    blurb:'The first chord distinction every musician learns.'},
+  {id:'ch-triads', group:'Chords', name:'All triads', kind:'chord', opts:['maj','min','dim','aug','sus2','sus4'],
+    blurb:'Major, minor, diminished, augmented and both suspended triads.'},
+  {id:'ch-inv3', group:'Chords', name:'Triad inversions', kind:'inversion', qual:['maj','min'], opts:INV3.map(x=>x[0]),
+    blurb:'Which chord tone is in the bass? Listen to the lowest note.'},
+  {id:'ch-7th', group:'Chords', name:'Seventh chords', kind:'chord', opts:['maj7','7','m7','m7b5','dim7','mmaj7'],
+    blurb:'The six four-note chords that carry most tonal and jazz harmony.'},
+  {id:'ch-inv7', group:'Chords', name:'Seventh inversions', kind:'inversion', qual:['maj7','7','m7','m7b5'], opts:INV7.map(x=>x[0]),
+    blurb:'Four positions for four-note chords, named by figured bass.'},
+  {id:'ch-ext', group:'Chords', name:'Extended and altered', kind:'chord', opts:['6','m6','69','maj9','9','m9','7b9','7s9','7s11','maj7s11','m11','13'],
+    blurb:'Sixths, ninths, elevenths and thirteenths, with altered tensions.'},
+];
+const LV = Object.fromEntries(LEVELS.map(l => [l.id, l]));
+
+// ---------- storage ----------
+const KEY = 'ear-ladder-v1';
+let store;
+try { store = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { store = null; }
+if (!store || !store.levels) store = {levels:{}, current:'deg-major', settings:{}};
+store.settings = Object.assign({chord:'both', key:'fixed', cadence:true, auto:true}, store.settings);
+if (!LV[store.current]) store.current = 'deg-major';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} };
+const rec = id => store.levels[id] || (store.levels[id] = {hist:[], total:0, correct:0, best:0, conf:{}, mastered:false});
+const last20 = id => { const h = rec(id).hist.slice(-20); return {n:h.length, ok:h.filter(Boolean).length, h}; };
+
+// ---------- audio ----------
+let ctx, master; const voices = new Set();
+function audio(){
+  if (!ctx) {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 4; comp.connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = 0.55; master.connect(comp);
+    const conv = ctx.createConvolver(), len = ctx.sampleRate * 1.8, buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/len, 3.2); }
+    conv.buffer = buf; const wet = ctx.createGain(); wet.gain.value = 0.2; master.connect(conv); conv.connect(wet); wet.connect(comp);
+  }
+  if (ctx.state === 'suspended') ctx.resume();
+  return ctx;
+}
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+const AMPS = [1, .5, .3, .19, .12, .08, .05];
+function note(m, t, dur, vel = .8){
+  const f = mtof(m), v = ctx.createGain(), lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass'; lp.frequency.setValueAtTime(Math.min(14000, f * 9), t); lp.frequency.exponentialRampToValueAtTime(Math.max(f * 2.5, 500), t + 1.6);
+  v.connect(lp); lp.connect(master);
+  const decay = 2.4 * Math.pow(2, -(m - 60) / 28), end = t + dur + 1;
+  AMPS.forEach((a, i) => {
+    const k = i + 1, fk = f * k * Math.sqrt(1 + .0004 * k * k); if (fk > 15000) return;
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = fk;
+    const peak = a * vel * .16;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + .005); g.gain.setTargetAtTime(0, t + .005, decay / Math.pow(k, .8));
+    o.connect(g); g.connect(v); o.start(t); o.stop(end);
+  });
+  v.gain.setValueAtTime(1, t); v.gain.setValueAtTime(1, t + dur); v.gain.setTargetAtTime(0, t + dur, .12);
+  voices.add(v); setTimeout(() => voices.delete(v), (end - ctx.currentTime) * 1000 + 100);
+}
+function hush(){
+  if (!ctx) return; const now = ctx.currentTime;
+  voices.forEach(v => { v.gain.cancelScheduledValues(now); v.gain.setTargetAtTime(0, now, .02); });
+  voices.clear(); clearTimeout(soundTimer); playBtn.classList.remove('sounding');
+}
+let soundTimer;
+// events: [{m, at, dur, vel}]
+function perform(events){
+  audio(); hush();
+  const t0 = ctx.currentTime + .05; let endAt = 0;
+  events.forEach(e => { note(e.m, t0 + e.at, e.dur, e.vel ?? .8); endAt = Math.max(endAt, e.at + e.dur); });
+  playBtn.classList.add('sounding');
+  soundTimer = setTimeout(() => playBtn.classList.remove('sounding'), (endAt + .2) * 1000);
+}
+const chordEv = (ms, at, dur) => ms.map(m => ({m, at, dur, vel: .85 / Math.sqrt(ms.length) * 1.3}));
+function chordEvents(ms, mode){
+  if (mode === 'block') return chordEv(ms, 0, 2.2);
+  const step = .26, arp = ms.map((m, i) => ({m, at: i*step, dur: (ms.length - i)*step + (mode === 'arp' ? 1.4 : .4), vel:.7}));
+  return mode === 'arp' ? arp : arp.concat(chordEv(ms, ms.length*step + .7, 2.2));
+}
+
+// ---------- questions ----------
+const rnd = n => Math.floor(Math.random() * n);
+const pick = a => a[rnd(a.length)];
+const midiIn = (pc, lo, hi) => { const c = []; for (let m = lo; m <= hi; m++) if (m % 12 === pc) c.push(m); return pick(c); };
+
+function voicing(qual, inv, rootMidi, root){
+  const tones = CHORDS[qual].tones.map(t => ({m: rootMidi + t.s, name: spell(root, t.s, t.d)}));
+  for (let i = 0; i < inv; i++) tones[i].m += 12;
+  return tones.sort((a, b) => a.m - b.m);
+}
+
+function make(level, prev){
+  let answer; do { answer = pick(level.opts); } while (level.opts.length > 2 && prev && prev.answer === answer && Math.random() < .7);
+  const q = {answer};
+  if (level.kind === 'degree') {
+    q.key = store.settings.key === 'fixed' ? ROOTS[0] : pick(ROOTS);
+    q.tonic = store.settings.key === 'fixed' ? 60 : midiIn(q.key.pc, 55, 66);
+  } else if (level.kind === 'interval') {
+    q.dir = level.dir === 'mixed' ? pick(['asc','harm']) : level.dir;
+    q.low = level.dir === 'mixed' ? 48 + rnd(12) : 52 + rnd(16);
+    q.root = ROOTS[q.low % 12];
+  } else {
+    q.root = pick(ROOTS); q.rootMidi = midiIn(q.root.pc, 48, 57);
+    q.qual = level.kind === 'inversion' ? pick(level.qual) : null;
+  }
+  return q;
+}
+
+// the notes an option would produce for this question
+function realize(level, q, opt){
+  if (level.kind === 'degree') {
+    const d = DEGREES[+opt]; return {notes:[{m: q.tonic + d.semi, name: spell(q.key, d.semi, d.deg)}], ref:[q.tonic]};
+  }
+  if (level.kind === 'interval') {
+    const iv = IV[opt]; return {notes:[{m:q.low, name:q.root.n}, {m:q.low + iv.semi, name: spell(q.root, iv.semi, iv.deg)}]};
+  }
+  if (level.kind === 'chord') return {notes: voicing(opt, 0, q.rootMidi, q.root)};
+  return {notes: voicing(q.qual, +opt, q.rootMidi, q.root)};
+}
+
+function eventsFor(level, q, opt, variant){
+  const r = realize(level, q, opt), ms = r.notes.map(n => n.m);
+  if (level.kind === 'degree') {
+    const t = q.tonic, target = ms[0];
+    if (variant === 'only') return [{m: target, at: 0, dur: 1.4}];
+    if (variant === 'compare' || !store.settings.cadence) return [{m: t, at: 0, dur: .8, vel: .6}, {m: target, at: 1, dur: 1.4}];
+    const cad = [[t-12, [0,4,7]], [t-7, [0,5,9]], [t-5, [-1,2,7]], [t-12, [0,4,7]]];
+    const ev = [];
+    cad.forEach(([bass, ch], i) => { const at = i * .62, dur = i === 3 ? 1 : .58;
+      ev.push({m: bass, at, dur, vel: .45}); ch.forEach(s => ev.push({m: t + s, at, dur, vel: .4})); });
+    ev.push({m: target, at: 3.2, dur: 1.5, vel: .9});
+    return ev;
+  }
+  if (level.kind === 'interval') {
+    const dir = variant === 'harm' ? 'harm' : variant === 'mel' ? 'asc' : q.dir;
+    const [a, b] = ms;
+    if (dir === 'harm') return [{m:a, at:0, dur:1.9, vel:.65}, {m:b, at:0, dur:1.9, vel:.65}];
+    return dir === 'desc' ? [{m:b, at:0, dur:.85}, {m:a, at:.8, dur:1.4}] : [{m:a, at:0, dur:.85}, {m:b, at:.8, dur:1.4}];
+  }
+  return chordEvents(ms, variant === 'block' || variant === 'arp' ? variant : store.settings.chord);
+}
+
+function optLabel(level, id){
+  if (level.kind === 'degree') {
+    const d = DEGREES[+id];
+    return store.settings.key === 'fixed'
+      ? {main: spell(ROOTS[0], d.semi, d.deg) + (d.semi === 12 ? '′' : ''), sub: `${d.solf} · ${degLabel(d.semi, d.deg)}`}
+      : {main: d.solf, sub: d.semi === 12 ? 'Octave' : `Degree ${degLabel(d.semi, d.deg)}`};
+  }
+  if (level.kind === 'interval') { const iv = IV[id]; return {main: iv.id === 'TT' ? 'TT' : iv.id, sub: iv.name}; }
+  if (level.kind === 'chord') { const c = CHORDS[id]; return {main: c.name, sub: c.tones.map(t => degLabel(t.s, t.d)).join(' ')}; }
+  const inv = (CHORDS[level.qual[0]].tones.length === 3 ? INV3 : INV7).find(x => x[0] === id);
+  return {main: inv[1], sub: 'Figured ' + inv[2]};
+}
+
+function describe(level, q){
+  const r = realize(level, q, q.answer), names = r.notes.map(n => n.name).join(' ');
+  if (level.kind === 'degree') {
+    const d = DEGREES[+q.answer];
+    return {title: `${d.solf} (${degLabel(d.semi, d.deg)})`, notes: `${r.notes[0].name} in ${q.key.n} major`};
+  }
+  if (level.kind === 'interval') {
+    const [a, b] = r.notes, iv = IV[q.answer];
+    return {title: iv.name, notes: q.dir === 'desc' ? `${b.name} down to ${a.name}` : q.dir === 'harm' ? `${a.name} with ${b.name}` : `${a.name} up to ${b.name}`};
+  }
+  if (level.kind === 'chord') { const c = CHORDS[q.answer]; return {title: `${q.root.n}${c.sym}`, notes: names}; }
+  const c = CHORDS[q.qual], inv = (c.tones.length === 3 ? INV3 : INV7).find(x => x[0] === q.answer);
+  return {title: `${q.root.n}${c.sym}, ${inv[1].toLowerCase()}`, notes: names + ' (bass first)'};
+}
+
+// ---------- UI ----------
+const $ = id => document.getElementById(id);
+const playBtn = $('play');
+let level = LV[store.current], q = null, played = false, answered = false, autoTimer;
+const session = {asked:0, right:0, streak:0};
+
+// keyboard
+const KB_LO = 48, KB_HI = 84, keyEls = {};
+(function buildKb(){
+  const kb = $('kb'); const whites = [];
+  for (let m = KB_LO; m <= KB_HI; m++) if (LPC.includes(m % 12)) whites.push(m);
+  const w = 100 / whites.length;
+  whites.forEach(m => { const d = document.createElement('div'); d.className = 'kw'; d.dataset.m = m;
+    if (m % 12 === 0) d.innerHTML = `<span>C${m/12 - 1}</span>`; kb.appendChild(d); keyEls[m] = d; });
+  for (let m = KB_LO; m <= KB_HI; m++) if (!LPC.includes(m % 12)) {
+    const before = whites.filter(x => x < m).length, d = document.createElement('div');
+    d.className = 'kbk'; d.dataset.m = m; d.style.left = `calc(${before * w}% - ${w * .32}%)`; d.style.width = `${w * .64}%`;
+    kb.appendChild(d); keyEls[m] = d;
+  }
+  kb.addEventListener('pointerdown', e => {
+    const k = e.target.closest('[data-m]'); if (!k) return; const m = +k.dataset.m;
+    audio(); note(m, ctx.currentTime + .01, .9, .8); k.classList.add('press'); setTimeout(() => k.classList.remove('press'), 160);
+  });
+})();
+function mark(on = [], ref = [], alt = []){
+  Object.values(keyEls).forEach(k => k.classList.remove('on','refk','alt-on'));
+  ref.forEach(m => keyEls[m]?.classList.add('refk'));
+  alt.forEach(m => keyEls[m]?.classList.add('alt-on'));
+  on.forEach(m => keyEls[m]?.classList.add('on'));
+}
+
+function renderLadder(){
+  const nav = $('ladder'); nav.innerHTML = '';
+  const next = LEVELS.find(l => !rec(l.id).mastered);
+  let g = '';
+  LEVELS.forEach((l, i) => {
+    if (l.group !== g) { g = l.group; const h = document.createElement('div'); h.className = 'eyebrow group-h'; h.textContent = g; nav.appendChild(h); }
+    const s = last20(l.id), r = rec(l.id), b = document.createElement('button');
+    b.className = 'rung'; b.setAttribute('aria-current', l === level ? 'true' : 'false');
+    const chip = r.mastered ? '<span class="chip done">Mastered</span>' : l === next ? '<span class="chip next">Up next</span>' : '<span></span>';
+    b.innerHTML = `<span class="g">${l.group}</span><span class="n">${String(i+1).padStart(2,'0')}</span><span class="t">${l.name}</span>${chip}<span class="meter"><i style="width:${s.ok/20*100}%"></i><b></b></span>`;
+    b.title = `${s.ok} of last ${s.n} correct`;
+    b.onclick = () => selectLevel(l.id);
+    nav.appendChild(b);
+  });
+}
+
+function selectLevel(id){
+  hush(); clearTimeout(autoTimer);
+  level = LV[id]; store.current = id; save();
+  session.asked = 0; session.right = 0; session.streak = 0;
+  renderLadder(); renderHead(); newQuestion(false);
+  const cur = document.querySelector('.rung[aria-current="true"]'); cur?.scrollIntoView({block:'nearest', inline:'nearest'});
+}
+
+function renderHead(){
+  $('lv-group').textContent = `Rung ${LEVELS.indexOf(level) + 1} · ${level.group}`;
+  $('lv-name').textContent = level.name;
+  $('lv-blurb').textContent = level.blurb;
+  const alt = $('alt'); alt.innerHTML = '';
+  const add = (label, variant) => { const b = document.createElement('button'); b.className = 'btn'; b.textContent = label;
+    b.onclick = () => { if (!q) return; perform(eventsFor(level, q, q.answer, variant)); played = true; unlock(); }; alt.appendChild(b); };
+  if (level.kind === 'degree') add('Note only', 'only');
+  else if (level.kind === 'interval') { if (level.dir !== 'harm') add('Together', 'harm'); else add('One after the other', 'mel'); }
+  else { add('Block', 'block'); add('Arpeggio', 'arp'); }
+  renderStats();
+}
+
+function renderAnswers(){
+  const box = $('answers'); box.innerHTML = '';
+  const keys = '1234567890-=';
+  level.opts.forEach((id, i) => {
+    const L = optLabel(level, id), b = document.createElement('button');
+    b.className = 'ans'; b.dataset.id = id; b.disabled = !played;
+    b.innerHTML = `<span class="k">${keys[i] ?? ''}</span><span class="main">${L.main}</span><span class="sub">${L.sub}</span>`;
+    b.onclick = () => choose(id);
+    box.appendChild(b);
+  });
+  box.classList.toggle('locked', !played);
+}
+function unlock(){
+  $('answers').classList.remove('locked');
+  if (!answered) { document.querySelectorAll('.ans').forEach(b => b.disabled = false); $('hint').textContent = 'What did you hear?'; }
+}
+
+function newQuestion(autoplay){
+  clearTimeout(autoTimer);
+  q = make(level, q); played = false; answered = false;
+  renderAnswers(); mark();
+  $('feedback').innerHTML = ''; $('compare').innerHTML = '';
+  $('hint').textContent = autoplay ? 'What did you hear?' : 'Press play to hear the question.';
+  if (autoplay) play();
+}
+
+function play(){
+  if (!q) return;
+  perform(eventsFor(level, q, q.answer));
+  played = true; unlock();
+}
+
+function choose(id){
+  if (answered || !played) return;
+  answered = true;
+  const ok = id === q.answer, r = rec(level.id);
+  r.hist.push(ok); if (r.hist.length > 40) r.hist = r.hist.slice(-40);
+  r.total++; if (ok) r.correct++;
+  session.asked++;
+  if (ok) { session.right++; session.streak++; r.best = Math.max(r.best, session.streak); }
+  else { session.streak = 0; const k = q.answer + '>' + id; r.conf[k] = (r.conf[k] || 0) + 1; }
+  const s = last20(level.id); const wasMastered = r.mastered;
+  if (s.n >= 20 && s.ok >= 18) r.mastered = true;
+  save();
+
+  document.querySelectorAll('.ans').forEach(b => {
+    b.disabled = true;
+    if (b.dataset.id === q.answer) b.classList.add('right');
+    else if (b.dataset.id === id) b.classList.add('wrong');
+  });
+  const real = realize(level, q, q.answer), d = describe(level, q);
+  mark(real.notes.map(n => n.m), real.ref || []);
+  const fb = $('feedback');
+  fb.innerHTML = `<span class="verdict ${ok ? 'good' : 'bad'}">${ok ? 'Correct.' : 'Not quite.'}</span>
+    <span>${ok ? '' : 'It was '}<strong>${d.title}</strong></span><span class="notes">${d.notes}</span>`;
+  if (r.mastered && !wasMastered) fb.innerHTML += `<span class="chip done">Rung mastered</span>`;
+  $('hint').textContent = ok ? 'Nice ear.' : 'Compare the two, then move on.';
+
+  const cmp = $('compare'); cmp.innerHTML = '';
+  const btn = (label, fn, cls = 'btn') => { const b = document.createElement('button'); b.className = cls; b.innerHTML = label; b.onclick = fn; cmp.appendChild(b); return b; };
+  const ev = opt => eventsFor(level, q, opt, level.kind === 'degree' ? 'compare' : undefined);
+  if (!ok) {
+    const mine = realize(level, q, id);
+    btn('Hear your answer', () => { perform(ev(id)); mark(real.notes.map(n => n.m), real.ref || [], mine.notes.map(n => n.m)); });
+    btn('Hear the right one', () => { perform(ev(q.answer)); mark(real.notes.map(n => n.m), real.ref || []); });
+  } else {
+    btn('Hear it again', () => perform(ev(q.answer)));
+  }
+  btn('Next <kbd>Enter</kbd>', () => newQuestion(true), 'btn primary');
+
+  renderStats(); renderLadder();
+  if (ok && store.settings.auto) autoTimer = setTimeout(() => newQuestion(true), level.kind === 'degree' ? 1600 : 1300);
+}
+
+function renderStats(){
+  $('c-score').textContent = `${session.right}/${session.asked}`;
+  $('c-streak').textContent = session.streak;
+  const r = rec(level.id), s = last20(level.id);
+  $('i-last').innerHTML = `${s.ok}<small>/${Math.max(s.n, 0)}${s.n < 20 ? ' so far' : ''}</small>`;
+  const dots = $('i-dots'); dots.innerHTML = '';
+  for (let i = 0; i < 20; i++) { const el = document.createElement('i'); if (i < s.n) el.className = s.h[i] ? 'y' : 'n'; dots.appendChild(el); }
+  $('i-mastery').textContent = r.mastered ? 'Mastered. Keep practicing here or climb to the next rung.'
+    : s.n < 20 ? `Answer ${20 - s.n} more, and get 18 of your last 20 right to master this rung.` : `${Math.max(0, 18 - s.ok)} more correct in your last 20 to master this rung.`;
+  $('i-all').innerHTML = r.total ? `${Math.round(r.correct / r.total * 100)}<small>%</small>` : '–';
+  $('i-all-sub').textContent = r.total ? `${r.correct} of ${r.total} correct. Best streak ${r.best}.` : 'No answers yet.';
+  const conf = Object.entries(r.conf).sort((a, b) => b[1] - a[1]).slice(0, 4), ul = $('i-conf');
+  ul.innerHTML = conf.length ? '' : '<li class="muted">Mistakes show up here so you know which pairs to drill.</li>';
+  conf.forEach(([k, n]) => {
+    const [a, g] = k.split('>'); if (!level.opts.includes(a) || !level.opts.includes(g)) return;
+    const li = document.createElement('li');
+    li.innerHTML = `<span>Heard <b>${optLabel(level, a).main}</b> as <b>${optLabel(level, g).main}</b></span><span class="x">${n}×</span>`;
+    ul.appendChild(li);
+  });
+}
+
+// settings
+function bindSeg(id, key, after){
+  const el = $(id);
+  const sync = () => el.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === store.settings[key])));
+  el.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; store.settings[key] = b.dataset.v; save(); sync(); after && after(); });
+  sync();
+}
+bindSeg('set-chord', 'chord');
+bindSeg('set-key', 'key', () => { if (level.kind === 'degree') newQuestion(false); });
+$('set-cadence').checked = store.settings.cadence;
+$('set-cadence').onchange = e => { store.settings.cadence = e.target.checked; save(); };
+$('set-auto').checked = store.settings.auto;
+$('set-auto').onchange = e => { store.settings.auto = e.target.checked; save(); if (!e.target.checked) clearTimeout(autoTimer); };
+let armTimer;
+$('reset').onclick = e => {
+  const b = e.currentTarget;
+  if (!b.classList.contains('arm')) { b.classList.add('arm'); b.textContent = 'Click again to erase everything'; armTimer = setTimeout(() => { b.classList.remove('arm'); b.textContent = 'Erase all progress'; }, 3500); return; }
+  clearTimeout(armTimer); store.levels = {}; save(); b.classList.remove('arm'); b.textContent = 'Progress erased';
+  setTimeout(() => b.textContent = 'Erase all progress', 1800); selectLevel(level.id);
+};
+
+playBtn.onclick = play;
+document.addEventListener('keydown', e => {
+  if (e.target.closest('input, select, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === ' ') { e.preventDefault(); play(); return; }
+  if (e.key === 'Enter' && answered) { e.preventDefault(); newQuestion(true); return; }
+  const i = '1234567890-='.indexOf(e.key);
+  if (i >= 0 && level.opts[i] !== undefined && played && !answered) choose(level.opts[i]);
+});
+
+renderLadder(); renderHead(); newQuestion(false);
+})();
+</script>
+</body>
+</html>
